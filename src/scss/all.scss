@@ -1,0 +1,14 @@
+@import "desctop/main";
+
+
+@media all and (max-width: 1124px){
+  @import 'responsive/tablet';
+}
+
+@media all and (max-width: 768px){
+  @import 'responsive/smartphone';
+}
+
+@media all and (max-width: 480px){
+  @import 'responsive/phone';
+}
