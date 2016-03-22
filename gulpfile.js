@@ -1,4 +1,5 @@
 var gulp = require('gulp'),
+    connect = require('gulp-connect'),
     del = require('del'),
     wiredep = require('wiredep').stream,
     gutil = require('gulp-util'),
@@ -6,7 +7,6 @@ var gulp = require('gulp'),
     rename = require('gulp-rename'),
     sass = require('gulp-sass'),
     concat = require('gulp-concat'),
-    webserver = require('gulp-webserver'),
     notify = require("gulp-notify"),
     imageop = require('gulp-image-optimization'),
     htmlmin = require('gulp-htmlmin'),
@@ -17,13 +17,13 @@ var gulp = require('gulp'),
 
 
 gulp.task('clean', function () {
-    del.sync(['./www/**']);
+    del.sync(['./www/', './www/**', './www/**/*.*']);
 });
 
 
 gulp.task('build', ['clean'], function (){
 ////COPY_REST///////////////////////////////////////////////////////////////////////////////////////////////////////////
-    gulp.src(['!./src/scss/**', '!./src/js/**', '!./src/**/*.html', './src/**'])
+    gulp.src(['./src/**/*.*', '!./src/scss/', '!./src/scss/**/*.*', '!./src/js/', '!./src/js/**/*.*', '!./src/**/*.html'])
         .pipe(gulp.dest('./www/'));
 ////BOWER///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     gulp.src('./src/**/*.html')
@@ -51,7 +51,9 @@ gulp.task('build', ['clean'], function (){
 ////HTML_MIN////////////////////////////////////////////////////////////////////////////////////////////////////////////
     gulp.src('./src/**/*.html')
         .pipe(htmlmin({collapseWhitespace: true}))
-        .pipe(gulp.dest('./www/'));
+        .pipe(gulp.dest('./www/'))
+
+        .pipe(connect.reload());
 });
 
 
@@ -65,18 +67,12 @@ gulp.task('imin', function() {
 });
 
 
-gulp.task('webserver', function () {
-    gulp.src('./www/')
-        .pipe(webserver({
-                livereload: true,
-                port: 11111,
-                open: 'index.html',
-                directoryListing: {
-                    enable: true,
-                    path: './www/'
-                }
-            })
-        )
+gulp.task('webserver', ['build'], function() {
+    connect.server({
+        port: 55555,
+        root: 'www',
+        livereload: true
+    });
 });
 
 
@@ -92,9 +88,7 @@ gulp.task('release', function () {
 });
 
 
-gulp.task('default', function () {
-    gulp.run(['clean', 'build', 'webserver']);
-
+gulp.task('default', ['webserver'], function () {
     gulp.watch('./src/**/*.*', ['build']);
 });
 
