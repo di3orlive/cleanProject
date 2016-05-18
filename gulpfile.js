@@ -1,6 +1,5 @@
 var gulp = require('gulp'),
     connect = require('gulp-connect'),
-    del = require('del'),
     wiredep = require('wiredep').stream,
     gutil = require('gulp-util'),
     plumber = require('gulp-plumber'),
@@ -13,68 +12,72 @@ var gulp = require('gulp'),
     minify = require('gulp-minify'),
     postcss = require('gulp-postcss'),
     autoprefixer = require('autoprefixer'),
+    changed = require('gulp-changed'),
+    clean = require('gulp-clean'),
     cssnano = require('cssnano');
 
 
-gulp.task('clean', function () {
-    del.sync(['./www/', './www/**', './www/**/*.*']);
+
+gulp.task('copy_rest', function() {
+    gulp.src(['./src/bower']).pipe(gulp.dest('./www/'));
 });
 
-
-gulp.task('build', ['clean'], function (){
-////COPY_REST///////////////////////////////////////////////////////////////////////////////////////////////////////////
-    gulp.src(['./src/**/*.*', '!./src/scss/', '!./src/scss/**/*.*', '!./src/js/', '!./src/js/**/*.*', '!./src/**/*.html'])
-        .pipe(gulp.dest('./www/'));
-////BOWER///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+gulp.task('bower', function() {
     gulp.src('./src/**/*.html')
         .pipe(plumber({errorHandler: reportError}))
         .pipe(wiredep({directory: './src/bower/'}))
         .pipe(gulp.dest('./src/'));
-////STYLE///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+});
+
+gulp.task('scss', function() {
     gulp.src(['./src/scss/all.scss'])
         .pipe(plumber({errorHandler: reportError}))
+        .pipe(changed('./www/css/'))
         .pipe(sass())
         .pipe(concat('main.css'))
         .pipe(gulp.dest('./www/css/'))
         .pipe(postcss([
-            autoprefixer,cssnano
+            autoprefixer({ browsers: ['last 5 versions'] }),cssnano
         ]))
         .pipe(rename({suffix: '-min'}))
         .pipe(gulp.dest('./www/css/'));
-////JS//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+});
+
+gulp.task('js', function() {
     gulp.src(['./src/js/main.js', './src/js/**/*.js'])
         .pipe(plumber({errorHandler: reportError}))
         .pipe(concat('main.js'))
         .pipe(gulp.dest('./www/js/'))
         .pipe(minify())
         .pipe(gulp.dest('./www/js/'));
-////HTML_MIN////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    gulp.src('./src/**/*.html')
-        .pipe(htmlmin({collapseWhitespace: true}))
-        .pipe(gulp.dest('./www/'))
-
-        .pipe(connect.reload());
 });
 
+gulp.task('html', function() {
+    gulp.src('./src/**/*.html')
+        .pipe(plumber({errorHandler: reportError}))
+        .pipe(changed('./www/'))
+        .pipe(htmlmin({collapseWhitespace: true}))
+        .pipe(gulp.dest('./www/'));
+});
 
 gulp.task('imin', function() {
-    gulp.src('./src/i/**/*.*')
+    gulp.src('./src/i/**')
+        .pipe(changed('./www/i/'))
         .pipe(imageop({
             optimizationLevel: 5,
             progressive: true,
             interlaced: true
-        })).pipe(gulp.dest('./src/imin/')).on('end').on('error');
+        }))
+        .pipe(gulp.dest('./www/i/'));
 });
 
-
-gulp.task('webserver', ['build'], function() {
+gulp.task('webserver', function() {
     connect.server({
         port: 55555,
         root: 'www',
-        livereload: true
+        livereload: false
     });
 });
-
 
 gulp.task('release', function () {
     var number = gutil.env.number;
@@ -88,9 +91,28 @@ gulp.task('release', function () {
 });
 
 
-gulp.task('default', ['webserver'], function () {
-    gulp.watch('./src/**/*.*', ['build']);
+
+
+gulp.task('cleaning', function() {
+    gulp.src('./www/', { read: false })
+        .pipe(clean());
 });
+
+gulp.task('watch', function() {
+    gulp.watch('./src/bower/**/*.*', ['copy_rest']);
+    gulp.watch('./src/scss/**/*.*', ['scss']);
+    gulp.watch('./src/js/**/*.*', ['js']);
+    gulp.watch('./src/**/*.html', ['html']);
+
+    gulp.watch('./src/i/**/*.*', ['imin']);
+    gulp.watch('.bowerrc', ['bower']);
+});
+
+gulp.task('build', function() {
+    gulp.start('copy_rest','imin','scss','js','html','webserver','watch');
+});
+
+gulp.task('default', ['cleaning', 'build']);
 
 //======================================================================================================================
 
