@@ -23,7 +23,7 @@ gulp.task('copy_rest', function() {
 });
 
 gulp.task('bower', function() {
-    gulp.src('./src/**/*.html')
+    gulp.src(['./src/*.html'])
         .pipe(plumber({errorHandler: reportError}))
         .pipe(wiredep({directory: './src/bower/'}))
         .pipe(gulp.dest('./src/'));
@@ -105,11 +105,11 @@ gulp.task('watch', function() {
     gulp.watch('./src/**/*.html', ['html']);
 
     gulp.watch('./src/i/**/*.*', ['imin']);
-    gulp.watch('.bowerrc', ['bower']);
+    gulp.watch('./bower.json', ['bower']);
 });
 
 gulp.task('build', function() {
-    gulp.start('copy_rest','imin','scss','js','html','webserver','watch');
+    gulp.start('copy_rest','imin','scss','js','bower','html','webserver','watch');
 });
 
 gulp.task('default', ['cleaning', 'build']);
