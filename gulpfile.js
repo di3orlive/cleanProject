@@ -18,11 +18,10 @@ var gulp = require('gulp'),
 
 
 
-gulp.task('copy_rest', function() {
-    gulp.src(['./src/bower']).pipe(gulp.dest('./www/'));
-});
 
 gulp.task('bower', function() {
+    gulp.src(['./src/bower/**/*.*']).pipe(gulp.dest('./www/bower/'));
+
     gulp.src(['./src/*.html'])
         .pipe(plumber({errorHandler: reportError}))
         .pipe(wiredep({directory: './src/bower/'}))
@@ -94,25 +93,22 @@ gulp.task('release', function () {
 
 
 gulp.task('cleaning', function() {
-    gulp.src('./www/', { read: false })
+    return gulp.src('./www/', { read: false })
         .pipe(clean());
 });
 
 gulp.task('watch', function() {
-    gulp.watch('./src/bower/**/*.*', ['copy_rest']);
     gulp.watch('./src/scss/**/*.*', ['scss']);
     gulp.watch('./src/js/**/*.*', ['js']);
     gulp.watch('./src/**/*.html', ['html']);
-
     gulp.watch('./src/i/**/*.*', ['imin']);
+
     gulp.watch('./bower.json', ['bower']);
 });
 
-gulp.task('build', function() {
-    gulp.start('copy_rest','imin','scss','js','bower','html','webserver','watch');
+gulp.task('default', ['cleaning'], function () {
+    gulp.start('imin','scss','js','bower','html','webserver','watch');
 });
-
-gulp.task('default', ['cleaning', 'build']);
 
 //======================================================================================================================
 

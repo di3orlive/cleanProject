@@ -9,5 +9,9 @@
     "tests"
   ],
   "dependencies": {
+    "angular": "^1.5.5",
+    "angular-route": "^1.5.5",
+    "angular-animate": "^1.5.5",
+    "reset-css": "^2.0.2011012603"
   }
 }
