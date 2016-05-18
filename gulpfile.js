@@ -47,7 +47,7 @@ gulp.task('js', function() {
         .pipe(plumber({errorHandler: reportError}))
         .pipe(concat('main.js'))
         .pipe(gulp.dest('./www/js/'))
-        .pipe(minify())
+        .pipe(minify({mangle:false}))
         .pipe(gulp.dest('./www/js/'));
 });
 

@@ -1,7 +1,7 @@
 'use strict';
 var app = angular.module('app', ['ngRoute', 'ngAnimate']);
 
-app.config(function ($routeProvider) {
+app.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
     $routeProvider
         .when('/', {
             templateUrl: 'views/home.html',
@@ -10,19 +10,14 @@ app.config(function ($routeProvider) {
         .otherwise({
             redirectTo: '/'
         });
-});
+
+    $locationProvider.html5Mode(true);
+}]);
 
 app.controller('mainCtrl', ['$scope', function ($scope) {
 
 }]);
 
 app.controller('homeCtrl', ['$scope', function ($scope) {
-    $scope.tab = 1;
 
-    $scope.setTab = function (newTab) {
-        $scope.tab = newTab;
-    };
-    $scope.isTab = function (tab) {
-        return $scope.tab === tab;
-    };
 }]);
