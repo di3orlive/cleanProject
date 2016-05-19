@@ -14,10 +14,15 @@ var gulp = require('gulp'),
     autoprefixer = require('autoprefixer'),
     changed = require('gulp-changed'),
     clean = require('gulp-clean'),
-    cssnano = require('cssnano');
+    cssnano = require('cssnano'),
+    sourcemaps = require('gulp-sourcemaps');
 
 
 
+
+gulp.task('copy_rest', function() {
+    gulp.src(['./src/fonts/**/*.*']).pipe(gulp.dest('./www/fonts/'));
+});
 
 gulp.task('bower', function() {
     gulp.src(['./src/bower/**/*.*']).pipe(gulp.dest('./www/bower/'));
@@ -32,6 +37,7 @@ gulp.task('scss', function() {
     gulp.src(['./src/scss/all.scss'])
         .pipe(plumber({errorHandler: reportError}))
         .pipe(changed('./www/css/'))
+        .pipe(sourcemaps.init())
         .pipe(sass())
         .pipe(concat('main.css'))
         .pipe(gulp.dest('./www/css/'))
@@ -39,6 +45,7 @@ gulp.task('scss', function() {
             autoprefixer({ browsers: ['last 5 versions'] }),cssnano
         ]))
         .pipe(rename({suffix: '-min'}))
+        .pipe(sourcemaps.write())
         .pipe(gulp.dest('./www/css/'));
 });
 
@@ -103,11 +110,13 @@ gulp.task('watch', function() {
     gulp.watch('./src/**/*.html', ['html']);
     gulp.watch('./src/i/**/*.*', ['imin']);
 
+    gulp.watch('./src/fonts/**/*.*', ['copy_rest']);
+
     gulp.watch('./bower.json', ['bower']);
 });
 
 gulp.task('default', ['cleaning'], function () {
-    gulp.start('imin','scss','js','bower','html','webserver','watch');
+    gulp.start('copy_rest','imin','scss','js','bower','html','webserver','watch');
 });
 
 //======================================================================================================================
