@@ -8,7 +8,6 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     notify = require("gulp-notify"),
     imageop = require('gulp-image-optimization'),
-    htmlmin = require('gulp-htmlmin'),
     minify = require('gulp-minify'),
     postcss = require('gulp-postcss'),
     autoprefixer = require('autoprefixer'),
@@ -22,6 +21,7 @@ var gulp = require('gulp'),
 
 gulp.task('copy_rest', function() {
     gulp.src(['./src/fonts/**/*.*']).pipe(gulp.dest('./www/fonts/'));
+    gulp.src(['./src/i/**/*.*']).pipe(gulp.dest('./www/i/'));
 });
 
 gulp.task('bower', function() {
@@ -62,7 +62,6 @@ gulp.task('html', function() {
     gulp.src('./src/**/*.html')
         .pipe(plumber({errorHandler: reportError}))
         .pipe(changed('./www/'))
-        .pipe(htmlmin({collapseWhitespace: true}))
         .pipe(gulp.dest('./www/'));
 });
 
@@ -108,15 +107,14 @@ gulp.task('watch', function() {
     gulp.watch('./src/scss/**/*.*', ['scss']);
     gulp.watch('./src/js/**/*.*', ['js']);
     gulp.watch('./src/**/*.html', ['html']);
-    gulp.watch('./src/i/**/*.*', ['imin']);
 
     gulp.watch('./src/fonts/**/*.*', ['copy_rest']);
 
-    gulp.watch('./bower.json', ['bower']);
+    gulp.watch('./src/bower/**/*.*', ['bower']);
 });
 
 gulp.task('default', ['cleaning'], function () {
-    gulp.start('copy_rest','imin','scss','js','bower','html','webserver','watch');
+    gulp.start('copy_rest','scss','js','bower','html','webserver','watch');
 });
 
 //======================================================================================================================
